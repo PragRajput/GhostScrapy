@@ -1,0 +1,28 @@
+# ------------------------------------------------------------------
+# Secrets & per-user data — NEVER commit these.
+# Session cookies, scraped CSVs, state, logs, and the Flask secret all
+# live under data/, which is generated at runtime.
+# ------------------------------------------------------------------
+data/
+
+# Local env files (the app authenticates via the web UI, not .env)
+.env
+.env.*
+
+# Generated caches / scraped output that can land in the repo root
+user_id_cache.json
+follower_counts_cache.json
+*.csv
+state_*.json
+unfollow_log.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# macOS
+.DS_Store
