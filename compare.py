@@ -7,7 +7,7 @@ Compare Instagram followers and following CSV files to find:
 
 Usage:
     python compare.py                 # auto-detects user ID from existing CSVs
-    python compare.py 33735762690     # specify user ID explicitly
+    python compare.py <user_id>       # specify user ID explicitly
 """
 
 import csv
@@ -19,22 +19,8 @@ import re
 import sys
 import time
 
-# ==============================================================================
-# FILTER CONFIGURATION
-# ==============================================================================
-# Exclude accounts with MORE followers than this limit from the "Not Following Back" list.
-# (Useful for excluding celebrities, brands, influencers, meme pages, etc.)
-#
-# Examples:
-#   MAX_FOLLOWER_COUNT = "10k"    # excludes accounts with > 10,000 followers
-#   MAX_FOLLOWER_COUNT = "50k"    # excludes accounts with > 50,000 followers
-#   MAX_FOLLOWER_COUNT = "100k"   # excludes accounts with > 100,000 followers
-#   MAX_FOLLOWER_COUNT = "1M"     # excludes accounts with > 1,000,000 followers
-#   MAX_FOLLOWER_COUNT = ""       # or None: NO FILTER - shows ALL accounts
-# ==============================================================================
+# Follower threshold filter (e.g. "10k", "50k", "1M", or "" for no filter)
 MAX_FOLLOWER_COUNT = ""
-
-# Set to True to also exclude verified accounts (blue checkmark) immediately
 EXCLUDE_VERIFIED = True
 
 

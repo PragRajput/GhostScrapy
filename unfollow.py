@@ -6,9 +6,9 @@ Dry-run by default: it looks up the account and reports what it WOULD do,
 without touching anything. Pass --confirm to actually unfollow.
 
 Usage:
-    python3 unfollow.py 15735543416            # dry run
-    python3 unfollow.py 15735543416 --confirm  # actually unfollow
-    python3 unfollow.py some_username          # username also works (costs a lookup)
+    python3 unfollow.py <user_id>            # dry run
+    python3 unfollow.py <user_id> --confirm  # actually unfollow
+    python3 unfollow.py some_username        # username also works (costs a lookup)
 
 Every real unfollow is appended to unfollow_log.csv.
 """

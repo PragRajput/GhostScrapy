@@ -235,9 +235,6 @@ function autoPopulateFromCookieString(raw) {
   if (map['mid']) document.getElementById('inputMid').value = map['mid'];
 }
 
-// ---------------------------------------------------------------------------
-// Step 1: User ID Entry Screen Submit
-// ---------------------------------------------------------------------------
 async function handleUserIdSubmit(e) {
   e.preventDefault();
   const rawInput = document.getElementById('userIdInput').value.trim();
@@ -262,7 +259,6 @@ async function handleUserIdSubmit(e) {
     const data = await res.json();
 
     if (data.status === 'valid') {
-      // Saved session is valid: advance straight to Dashboard!
       currentUserId = data.user_id;
       localStorage.setItem('ghostscrapy_user_id', data.user_id);
       if (data.profile && data.profile.username) {
@@ -278,7 +274,6 @@ async function handleUserIdSubmit(e) {
       triggerExistingAnalysis(data.user_id);
 
     } else if (data.status === 'expired') {
-      // Saved session expired: show session gate with warning notice
       currentUserId = data.user_id;
       document.getElementById('inputDsUserId').value = data.user_id;
       const notice = document.getElementById('sessionNotice');
@@ -288,7 +283,6 @@ async function handleUserIdSubmit(e) {
       showScreen('session_gate');
 
     } else if (data.status === 'not_found') {
-      // No saved credentials: show session gate to enter credentials
       currentUserId = data.user_id;
       document.getElementById('inputDsUserId').value = data.user_id;
       const notice = document.getElementById('sessionNotice');
@@ -311,9 +305,6 @@ async function handleUserIdSubmit(e) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Step 2: Session Credentials Submit (Strict Validation Gate)
-// ---------------------------------------------------------------------------
 async function handleSessionSubmit(e) {
   e.preventDefault();
 
@@ -370,7 +361,6 @@ async function handleSessionSubmit(e) {
     const data = await res.json();
 
     if (res.ok && data.status === 'success') {
-      // VALID! Advance to Dashboard
       const profile = data.profile || {};
       const targetVal = ds_user_id;
       currentUserId = ds_user_id;
@@ -386,7 +376,6 @@ async function handleSessionSubmit(e) {
       triggerExistingAnalysis(targetVal);
 
     } else {
-      // WRONG / REJECTED: DO NOT SAVE, DO NOT MOVE FORWARD!
       errBox.textContent = data.message || 'Instagram rejected the session credentials. Please ensure full sessionid string is entered.';
       errBox.style.display = 'block';
     }
@@ -400,9 +389,6 @@ async function handleSessionSubmit(e) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Step 3: Dashboard Functions
-// ---------------------------------------------------------------------------
 async function handleSwitchAccount() {
   try {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -413,7 +399,6 @@ async function handleSwitchAccount() {
   localStorage.removeItem('ghostscrapy_username');
   localStorage.removeItem('instascrap_username');
 
-  // Return to Screen 1
   const uidInput = document.getElementById('userIdInput');
   if (uidInput) {
     const saved = localStorage.getItem('ghostscrapy_user_id') || localStorage.getItem('instascrap_user_id');
@@ -422,7 +407,7 @@ async function handleSwitchAccount() {
   showScreen('user_gate');
 }
 
-// Quick load from existing saved CSV files (0 network calls to Instagram)
+// Load cached analysis results if available
 async function triggerExistingAnalysis(target) {
   try {
     const res = await fetch(`/api/saved_results/${encodeURIComponent(target)}`);
@@ -434,9 +419,7 @@ async function triggerExistingAnalysis(target) {
         renderResults(data);
       }
     }
-  } catch (e) {
-    // Silent cached load
-  }
+  } catch (e) {}
 }
 
 // Analyze Non-Followers
@@ -783,18 +766,13 @@ function exportCurrentCSV() {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Initial App Bootstrapping
-// ---------------------------------------------------------------------------
 async function initApp() {
   const savedUserId = localStorage.getItem('ghostscrapy_user_id') || localStorage.getItem('instascrap_user_id');
 
   if (savedUserId) {
-    // Pre-populate User ID input
     const uidInput = document.getElementById('userIdInput');
     if (uidInput) uidInput.value = savedUserId;
 
-    // Check if session for this user is still valid
     try {
       const res = await fetch('/api/auth/check_user', {
         method: 'POST',
@@ -816,7 +794,6 @@ async function initApp() {
         triggerExistingAnalysis(data.user_id);
         return;
       } else if (data.status === 'expired') {
-        // Saved session is expired: show session gate with warning notice
         currentUserId = data.user_id;
         document.getElementById('inputDsUserId').value = data.user_id;
         const notice = document.getElementById('sessionNotice');
@@ -825,12 +802,9 @@ async function initApp() {
         showScreen('session_gate');
         return;
       }
-    } catch (e) {
-      // Fall through to user gate
-    }
+    } catch (e) {}
   }
 
-  // Default initial screen: Screen 1 (User ID Gate)
   showScreen('user_gate');
 }
 

@@ -131,9 +131,6 @@ def get_active_credentials(user_id=None):
         return cookies
 
     # 2. If user_id specified, load that account's saved creds.
-    # NOTE: multi-user caveat — anyone who knows a saved account's numeric ID can
-    # load its session this way. Acceptable only among people you trust; a fresh
-    # visitor with no session of their own is NOT silently logged in as anyone.
     if user_id:
         creds = load_user_credentials(str(user_id))
         if creds and creds.get("sessionid") and creds.get("ds_user_id"):

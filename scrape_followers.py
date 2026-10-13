@@ -11,19 +11,19 @@ Instagram stops handing one back. Resilient: saves its cursor so you can resume
 after a 429/crash, dedupes by pk, and retries transient errors.
 
 Usage:
-    export IG_SESSIONID='33735762690%3A...'      # value of the `sessionid` cookie
-    export IG_CSRFTOKEN='AXHkHUdOGstYWuKpbyS3Ug48rvbRf5t5'
-    export IG_DS_USER_ID='33735762690'
-    export IG_MID='ai6otgAEAAEQMJiqCJNEIyTRtVoU'
+    export IG_SESSIONID='<your_session_id>'      # value of the `sessionid` cookie
+    export IG_CSRFTOKEN='<your_csrf_token>'
+    export IG_DS_USER_ID='<your_user_id>'
+    export IG_MID='<your_mid>'
 
-    python scrape_followers.py 1550693326               # scrape followers (default)
-    python scrape_followers.py 1550693326 following     # scrape following
-    python scrape_followers.py 1550693326 both          # scrape followers AND following
-    python scrape_followers.py narendramodi 500         # limit to ~500 followers
-    python scrape_followers.py narendramodi following 500
+    python scrape_followers.py <user_id>               # scrape followers (default)
+    python scrape_followers.py <user_id> following     # scrape following
+    python scrape_followers.py <user_id> both          # scrape followers AND following
+    python scrape_followers.py username 500            # limit to ~500 followers
+    python scrape_followers.py username following 500
 
 To find who doesn't follow you back:
-    python compare.py 1550693326
+    python compare.py <user_id>
 """
 
 import csv
@@ -259,25 +259,19 @@ def get_page(s, user_id, max_id, rel_type="followers", rank_token=None):
                 loc = r.headers.get("Location", "")
                 low = loc.lower()
                 path = urlparse(loc).path or "/"
-                # A /login, challenge, or checkpoint redirect means the session is
-                # genuinely invalid — reconnecting is the fix.
+                # Login / challenge redirects mean invalid session
                 if "login" in low or "challenge" in low or "checkpoint" in low:
                     raise RuntimeError(
-                        "Instagram session expired or flagged (redirected to login/challenge). "
+                        "Instagram session expired or flagged (redirected to login). "
                         "Reconnect with fresh cookies in the web UI, then try again."
                     )
-                # A bounce to the bare homepage while the session is otherwise valid
-                # (profile and the other list still load) means IG is temporarily
-                # rate-limiting THIS list endpoint for the account. Reconnecting will
-                # not help — it needs to rest.
+                # Homepage redirect indicates temporary endpoint throttling
                 if path in ("", "/"):
                     raise RuntimeError(
                         f"Instagram is temporarily rate-limiting the {rel_type} list for this "
-                        f"account (the request was redirected to the homepage). Your login is "
-                        f"still valid — wait a few hours and try again, and avoid repeated "
-                        f"re-scrapes in the meantime."
+                        f"account (redirected to homepage). Try again later."
                     )
-                # Genuine regional routing redirect: refresh routing cookies and retry.
+                # Regional routing redirect: refresh cookies and retry
                 if "rur" in s.cookies:
                     clean_rur = normalize_rur(s.cookies.get("rur"))
                     s.cookies.set("rur", clean_rur, domain=".instagram.com")
@@ -493,10 +487,10 @@ def parse_cli_args():
         sys.exit(
             "Usage: python scrape_followers.py <username|user_id> [followers|following|both] [max_users]\n\n"
             "Examples:\n"
-            "  python scrape_followers.py 1550693326\n"
-            "  python scrape_followers.py 1550693326 following\n"
-            "  python scrape_followers.py 1550693326 both\n"
-            "  python scrape_followers.py my_username both 500"
+            "  python scrape_followers.py <user_id>\n"
+            "  python scrape_followers.py <user_id> following\n"
+            "  python scrape_followers.py <user_id> both\n"
+            "  python scrape_followers.py username both 500"
         )
 
     target = sys.argv[1]

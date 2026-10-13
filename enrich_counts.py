@@ -8,7 +8,7 @@ follower_counts_cache.json as it goes. If Instagram starts blocking, it stops
 and saves; re-run later to continue where it left off.
 
 Usage:
-    python3 enrich_counts.py not_following_back_3623970259.csv
+    python3 enrich_counts.py not_following_back_<user_id>.csv
 """
 
 import csv

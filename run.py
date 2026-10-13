@@ -63,17 +63,14 @@ def main():
     ngrok_process = None
     public_url = None
 
-    print("=" * 66)
-    print("  🚀 Starting GhostScrapy Web Application...")
-    print("=" * 66)
+    print(f"Starting GhostScrapy on port {PORT}...")
 
     if use_ngrok:
         ngrok_bin = find_ngrok()
         if not ngrok_bin:
-            print("[Warning] ngrok binary not found in PATH or /opt/homebrew/bin/ngrok.")
-            print("Falling back to local-only mode.")
+            print("[warning] ngrok binary not found in PATH. Falling back to local mode.")
         else:
-            print(f"[ngrok] Launching tunnel on port {PORT} via {ngrok_bin}...")
+            print(f"[ngrok] Launching tunnel via {ngrok_bin}...")
             try:
                 ngrok_process = subprocess.Popen(
                     [ngrok_bin, "http", str(PORT)],
@@ -82,19 +79,15 @@ def main():
                 )
                 public_url = get_ngrok_url()
                 if public_url:
-                    print("\n" + "✨" * 33)
-                    print(f"  🌐 PUBLIC NGROK URL: {public_url}")
-                    print(f"  Share this link with anyone to let them check non-followers!")
-                    print("✨" * 33 + "\n")
+                    print(f"[ngrok] Public URL: {public_url}")
                 else:
-                    print("[ngrok] Tunnel started. If prompt requires an auth token, run:")
-                    print("  ngrok config add-authtoken <YOUR_TOKEN>\n")
+                    print("[ngrok] Tunnel started. If prompt requires an auth token, run: ngrok config add-authtoken <TOKEN>")
             except Exception as e:
-                print(f"[Warning] Failed to start ngrok: {e}")
+                print(f"[warning] Failed to start ngrok: {e}")
 
     local_url = f"http://localhost:{PORT}"
-    print(f"  🏠 Local URL: {local_url}")
-    print("  Press Ctrl+C to stop the server\n" + "=" * 66 + "\n")
+    print(f"Local URL:  {local_url}")
+    print("Press Ctrl+C to stop the server.\n")
 
     # Auto-open browser
     target_browser_url = public_url if public_url else local_url
